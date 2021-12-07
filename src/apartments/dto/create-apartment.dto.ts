@@ -5,6 +5,7 @@ export class CreateApartmentDto {
     ward: string;
     district: string;
     city: string;
+    locationDescription: string;
 
     title: string;
     content: string;
@@ -12,7 +13,8 @@ export class CreateApartmentDto {
     status: string;
     price: number;
     propertyType: string;
-    userId: string;
+    userId: number;
+    guest: number;
     images: string[];
     amenities: string[];
 }

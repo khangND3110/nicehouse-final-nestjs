@@ -23,6 +23,9 @@ export class Apartment extends Model {
     bedRoom: number;
 
     @Column
+    guests: number;
+
+    @Column
     status: string;
 
     @Column
@@ -65,7 +68,4 @@ export class Apartment extends Model {
 
     @HasMany(() => Review)
     reviews: Review[];
-
-    @BelongsToMany(() => User, () => Review)
-    userReviews: User[];
 }

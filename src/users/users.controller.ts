@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, UseGuards, Req, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, UseGuards, Req, UseInterceptors, UploadedFile, UploadedFiles, Param, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AuthService } from 'src/jwt/auth.service';
@@ -10,12 +10,17 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Request } from 'express';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { UploadUserImage } from 'src/config/file.config';
+import { Observable, of } from 'rxjs';
+import { join } from 'path';
+import { MailPayload } from 'src/mail/dto/mail.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly mailService: MailService,
   ) { }
 
   @Post('login')
@@ -31,14 +36,8 @@ export class UsersController {
       email: user.email,
     };
 
-    const response: ResponseUserDto = {
-      email: user.email,
-      fullName: user.fullName,
-      phoneNumber: user.phoneNumber,
-      content: user.content,
-      accessToken: await this.authService.signPayload(jwtPayload),
-    }
-    return response;
+    const accessToken = await this.authService.signPayload(jwtPayload);
+    return { user, accessToken };
   }
 
   @Post('register')
@@ -47,6 +46,13 @@ export class UsersController {
   ): Promise<any> {
     await this.usersService.register(body);
     return 'Register successfully'
+  }
+
+  @Get('avatar/:id')
+  async getUserAvatar(
+    @Param('id') id,
+  ): Promise<any> {
+    return await this.usersService.getUserAvatar(id);
   }
 
   @Get()
@@ -95,7 +101,7 @@ export class UsersController {
     UploadUserImage,
   ))
   async updateUserImage(
-    @UploadedFiles() files: { avatar?: Express.Multer.File[], background?: Express.Multer.File[] },
+    @UploadedFiles() files: { avatar?: Express.Multer.File, background?: Express.Multer.File },
     @Req() request: Express.Request,
   ): Promise<any> {
     const user = request.user as JwtPayload;
@@ -129,5 +135,29 @@ export class UsersController {
   ): Promise<any> {
     const user = request.user as JwtPayload;
     return await this.usersService.getApartmentFavorite(user.id);
+  }
+
+  @Get('image/:id/:url')
+  async downloadImage(
+    @Param('url') url,
+    @Param('id') id,
+    @Res() res,
+  ): Promise<Observable<any>> {
+    const response = res.sendFile(
+      join(process.cwd(), `./uploads/user-image/${id}/${url}`),
+    );
+    return of(response);
+  }
+
+  @Post('send-email')
+  async sendEmail(@Body() mailPayload: MailPayload): Promise<any> {
+    return await this.mailService.sendEmail(mailPayload);
+  }
+
+  @Get(':id')
+  async getUserInfoContact(
+    @Param('id') id: number,
+  ): Promise<any> {
+    return await this.usersService.findOne(id);
   }
 }

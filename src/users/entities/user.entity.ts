@@ -54,9 +54,6 @@ export class User extends Model {
     @HasMany(() => Review)
     reviews: Review[];
 
-    @BelongsToMany(() => Apartment, () => Review)
-    apartmentReviews: Apartment[];
-
     @HasMany(() => Apartment)
     apartmentOwners: Apartment[];
 }

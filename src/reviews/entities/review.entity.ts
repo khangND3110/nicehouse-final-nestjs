@@ -1,20 +1,22 @@
-import { BelongsTo, Column, CreatedAt, DataType, ForeignKey, HasMany, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, CreatedAt, DataType, ForeignKey, Model, PrimaryKey, Table, UpdatedAt } from "sequelize-typescript";
 import { Apartment } from "src/apartments/entities/apartment.entity";
 import { ReviewField } from "src/review-fields/entities/review-field.entity";
-import { ReviewImage } from "src/review-images/entities/review-image.entity";
 import { User } from "src/users/entities/user.entity";
 
 @Table({
     timestamps: true,
 })
-export class Review extends Model { 
-    @ForeignKey(() => User)
+export class Review extends Model {
+    @AutoIncrement
     @PrimaryKey
+    @Column
+    id: number;
+
+    @ForeignKey(() => User)
     @Column
     userId: number;
 
     @ForeignKey(() => Apartment)
-    @PrimaryKey
     @Column
     apartmentId: number;
 
@@ -23,6 +25,9 @@ export class Review extends Model {
 
     @Column
     text: string;
+
+    @Column
+    ratings: number;
 
     @CreatedAt
     createdAt: string;
@@ -36,8 +41,8 @@ export class Review extends Model {
     @BelongsTo(() => Apartment)
     apartment: Apartment;
 
-    @Column({ type: DataType.ARRAY(DataType.JSON)})
-    reviewFields: ReviewField[];
+    @Column({ type: DataType.JSON})
+    reviewFields: ReviewField;
 
     @Column({ type: DataType.ARRAY(DataType.STRING)})
     reviewImages: string[];

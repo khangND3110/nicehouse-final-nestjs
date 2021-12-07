@@ -2,13 +2,18 @@ import { Controller, Get, Post, Body, Param, Delete, UseGuards, UseInterceptors,
 import { ReviewsService } from './reviews.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadReviewImage } from 'src/config/file.config';
 import { JwtPayload } from 'src/jwt/auth.payload';
 
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) { }
+
+  @Get()
+  async getReview(): Promise<any> {
+    return await this.reviewsService.getReview();
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
@@ -18,16 +23,22 @@ export class ReviewsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  @UseInterceptors(FilesInterceptor('images', 3, UploadReviewImage,))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'images', maxCount: 3, },
+  ],
+    UploadReviewImage,
+  ))
   async createReview(
-    @UploadedFiles() images: Array<Express.Multer.File>,
+    @UploadedFiles() files: { images?: Express.Multer.File[] },
     @Body() body: CreateReviewDto,
     @Req() request: Express.Request,
   ): Promise<any> {
     const user = request.user as JwtPayload;
-    let imageFileNames = images.map(item => item.filename);
+    let imageFileNames = files['images'].map(item => item.path);
     body.reviewImages = imageFileNames;
     body.userId = user.id;
+    body.ratings = parseInt(body.ratings.toString());
+    body.apartmentId = parseInt(body.apartmentId.toString());
     return await this.reviewsService.createReview(body);
   }
 

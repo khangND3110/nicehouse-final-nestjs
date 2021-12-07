@@ -1,5 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFiles, Put } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFiles, Put, Res } from '@nestjs/common';
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { join } from 'path';
+import { Observable, of } from 'rxjs';
 import { UploadApartmentImage } from 'src/config/file.config';
 import { JwtPayload } from 'src/jwt/auth.payload';
 import { JwtAuthGuard } from 'src/jwt/jwt-auth.guard';
@@ -25,7 +27,6 @@ export class ApartmentsController {
     return await this.apartmentsService.getApartmentsOwner(user.id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getApartmentDetail(
     @Param() params,
@@ -35,26 +36,62 @@ export class ApartmentsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  // @UseInterceptors(FilesInterceptor('images', 3, UploadApartmentImage,))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'images', maxCount: 2, },
+  ],
+    UploadApartmentImage,
+  ))
   async createApartment(
+    @Req() request: Express.Request,
     @Body() body: CreateApartmentDto,
-    // @UploadedFiles() images: Array<Express.Multer.File>,
+    @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
-    // let imageFileNames = images.map(item => item.filename);
-    // body.images = imageFileNames;
+    const user = request.user as JwtPayload;
+    let imageFileNames = files['images'].map(item => item.path);
+    body.images = imageFileNames;
+    body.userId = user.id;
+    body.bedRoom = parseInt(body.bedRoom.toString());
+    body.guest = parseInt(body.guest.toString());
+    body.price = parseInt(body.price.toString());
+    body.amenities = body.amenities.toString().split(',');
     return await this.apartmentsService.createApartment(body);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put()
-  @UseInterceptors(FilesInterceptor('images', 3, UploadApartmentImage,))
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'images', maxCount: 2, },
+  ],
+    UploadApartmentImage,
+  ))
   async updateApartment(
+    @Req() request: Express.Request,
     @Body() body: UpdateApartmentDto,
-    @UploadedFiles() images: Array<Express.Multer.File>,
+    @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
-    let imageFileNames = images.map(item => item.filename);
+    const user = request.user as JwtPayload;
+    let imageFileNames = files['images'].map(item => item.path);
     body.images = imageFileNames;
+    body.userId = user.id;
+    body.bedRoom = parseInt(body.bedRoom.toString());
+    body.guest = parseInt(body.guest.toString());
+    body.price = parseInt(body.price.toString());
+    body.amenities = body.amenities.toString().split(',');
     return await this.apartmentsService.updateApartment(body);
+  }
+
+  @Get('image/:uploads/:apartment-image/:timestamp/:filename')
+  async downloadImage(
+    @Param('uploads') uploads,
+    @Param('apartment-image') apartmentImage,
+    @Param('timestamp') timestamp,
+    @Param('filename') filename,
+    @Res() res,
+  ): Promise<any> {
+    const response = res.sendFile(
+      join(process.cwd(), `./${uploads}/apartment-image/${timestamp}/${filename}`),
+    );
+    return of(response);
   }
 
   @UseGuards(JwtAuthGuard)

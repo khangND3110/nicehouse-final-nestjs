@@ -15,7 +15,7 @@ import { AllExceptionModule } from './filter-exception/all-exception.module';
     ReviewsModule,
     DatabaseModule,
     TransformModule,
-    AllExceptionModule,
+    // AllExceptionModule,
   ],
   controllers: [AppController],
   providers: [

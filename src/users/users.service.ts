@@ -48,11 +48,16 @@ export class UsersService {
   async register(data: CreateUserDto): Promise<any> {
     data.password = await bcrypt.hash(data.password, 10);
     const user = await this.usersRepository.create(data);
+    return user;
+  }
 
-    await this.avatarImagesRepository.create({
-      avatarUrl: 'https://i.pinimg.com/564x/f0/0e/34/f00e3486d823542c8a31cfe603f14b98.jpg?fbclid=IwAR3CpN5gyDZ8d4ZJRdqXtK2t_Jo_ZcS_ImjHteqcbw5I7ZINVy4PGHYIKZM',
-      backgroundUrl: 'https://pbs.twimg.com/media/Eu6ekvHWYAM2CQN?format=jpg&name=4096x4096',
-      userId: user.id,
+  async getUserAvatar(id: number): Promise<any> {
+    return await this.avatarImagesRepository.findOne({
+      where: {
+        userId: id,
+      },
+      raw: true,
+      nest: true,
     });
   }
 

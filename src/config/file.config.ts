@@ -31,8 +31,7 @@ export const UploadUserImage: MulterOptions = {
 export const UploadApartmentImage: MulterOptions = {
     storage: diskStorage({
         destination: (req: Express.Request, file, cb) => {
-            const user = req.user as JwtPayload;
-            const path = `./uploads/apartment-image/${user.id}/`;
+            const path = `./uploads/apartment-image/${new Date().getTime()}/`;
             mkdirsSync(path);
             cb(null, path);
         },
@@ -57,7 +56,7 @@ export const UploadReviewImage: MulterOptions = {
     storage: diskStorage({
         destination: (req: Express.Request, file, cb) => {
             const user = req.user as JwtPayload;
-            const path = `./uploads/review-image/${user.id}/`;
+            const path = `./uploads/review-image/${new Date().getTime()}/`;
             mkdirsSync(path);
             cb(null, path);
         },

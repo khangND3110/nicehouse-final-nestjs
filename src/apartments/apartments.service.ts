@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Location } from 'src/locations/entities/location.entity';
 import { Review } from 'src/reviews/entities/review.entity';
+import { User } from 'src/users/entities/user.entity';
 import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentDto } from './dto/update-apartment.dto';
 import { Apartment } from './entities/apartment.entity';
@@ -17,63 +18,59 @@ export class ApartmentsService {
   ) { }
 
   async getAllApartments(): Promise<any> {
-    return await this.apartmentsRepository.findAll();
+    return await this.apartmentsRepository.findAll(
+      {
+        include: [
+          Location,
+        ]
+      }
+    );
   }
 
   async getApartmentsOwner(id: number): Promise<any> {
     return await this.apartmentsRepository.findAll({
-      where: { userId: id }
+      where: { authorId: id },
+      include: [
+        Location,
+      ]
     });
   }
 
   async getApartmentDetail(apartmentId: number): Promise<any> {
     return await this.apartmentsRepository.findOne({
-      where: { id: apartmentId }
+      where: { id: apartmentId },
+      include: [
+        Location,
+      ]
     });
   }
 
-  async createApartment(createApartmentDto: CreateApartmentDto): Promise<any> {
-    const {
-      lat,
-      lng,
-      street,
-      ward,
-      district,
-      city,
-      title,
-      content,
-      bedRoom,
-      status,
-      price,
-      propertyType,
-      userId,
-      images,
-      amenities,
-    } = createApartmentDto;
+  async createApartment(data: CreateApartmentDto): Promise<any> {
 
-    // return await this.locationRepository.findAll();
+    const location = await this.locationRepository.create({
+      lat: data.lat,
+      lng: data.lng,
+      street: data.street,
+      ward: data.ward,
+      district: data.district,
+      city: data.city,
+      locationDescription: data.locationDescription,
+    });
 
-    // return await this.locationRepository.create({
-    //   lat: Number.parseFloat(lat.toString()),
-    //   lng: Number.parseFloat(lng.toString()),
-    //   street: street,
-    //   ward: ward,
-    //   district: district,
-    //   city: city,
-    // });
-
-    // console.log('locationId: ',location.id)
+    // return data;
 
     return await this.apartmentsRepository.create({
-      title,
-      content,
-      bedRoom,
-      status,
-      price,
-      propertyType,
-      userId,
-      images,
-      amenities,
+      title: data.title,
+      content: data.content,
+      bedRoom: data.bedRoom,
+      status: data.status,
+      price: data.price,
+      propertyType: data.propertyType,
+      authorId: data.userId,
+      images: data.images,
+      guest: data.guest,
+      amenities: data.amenities,
+      locationId: location.id,
     });
   }
 

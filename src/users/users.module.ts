@@ -11,16 +11,16 @@ import { LocationsService } from 'src/locations/locations.service';
 import { locationsProviders } from 'src/locations/locations.provider';
 import { AvatarImagesService } from 'src/avatar-images/avatar-images.service';
 import { avatarImagesProviders } from 'src/avatar-images/avatar-images.provider';
-import { MulterModule } from '@nestjs/platform-express';
 import { ApartmentFavoritesService } from 'src/apartment-favorites/apartment-favorites.service';
 import { apartmentFavoritesProviders } from 'src/apartment-favorites/apartment-favorites.provider';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
-    // MailModule,
+    MailModule,
     JwtModule.register({
       secret: 'secretKey',
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '30d' },
     }),
     // MulterModule.registerAsync({
     //   useFactory: () => ({

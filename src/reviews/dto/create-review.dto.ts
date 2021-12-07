@@ -6,6 +6,11 @@ export class CreateReviewDto {
     apartmentId: number;
     title: string;
     text: string;
-    reviewFields: ReviewField[];
+    ratings: number;
+    // reviewFields: ReviewField;
     reviewImages: string[];
+    serviceRatings: string;
+    roomsRatings: string;
+    cleanlinessRatings: string;
+    foodRatings: string;
 }

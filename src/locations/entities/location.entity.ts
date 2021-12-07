@@ -10,10 +10,10 @@ export class Location extends Model {
     id: number;
 
     @Column
-    lat: number;
+    lat: string;
 
     @Column
-    lng: number;
+    lng: string;
 
     @Column
     street: string;
@@ -26,6 +26,9 @@ export class Location extends Model {
 
     @Column
     city: string;
+
+    @Column
+    locationDescription: string;
 
     @HasOne(() => User)
     user: User;

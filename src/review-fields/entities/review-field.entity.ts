@@ -1,4 +1,6 @@
 export class ReviewField {
-    rating: number;
-    name: string;
- }
+    serviceRatings: string;
+    roomsRatings: string;
+    cleanlinessRatings: string;
+    foodRatings: string;
+}
