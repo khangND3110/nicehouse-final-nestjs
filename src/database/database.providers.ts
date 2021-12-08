@@ -15,7 +15,7 @@ export const databaseProviders = [
                 host: 'localhost',
                 port: 5432,
                 username: 'postgres',
-                password: '123456',
+                password: 'ndkhang3110',
                 database: 'nicehouse',
             });
             sequelize.addModels([
